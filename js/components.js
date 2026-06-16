@@ -193,6 +193,7 @@ const ComponentLibrary = (() => {
             icon: '📊',
             defaults: {
                 columns: 2,
+                gap: 12,
                 paddingTop: 12,
                 paddingBottom: 12,
                 paddingLeft: 20,
@@ -204,6 +205,7 @@ const ComponentLibrary = (() => {
                     { value: 2, label: '2 栏' },
                     { value: 3, label: '3 栏' }
                 ]},
+                { key: 'gap', label: '栏间距(px)', type: 'range', min: 0, max: 50, step: 2 },
                 { type: 'group', label: '外边距', fields: [
                     { key: 'paddingTop', label: '上', type: 'number' },
                     { key: 'paddingBottom', label: '下', type: 'number' }

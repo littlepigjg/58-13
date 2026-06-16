@@ -103,6 +103,7 @@ const TemplateEngine = (() => {
     function renderColumns(block) {
         var d = block.data;
         var columns = d.columns || 2;
+        var gap = d.gap !== undefined ? d.gap : 12;
         var widthPct = Math.floor(100 / columns);
         var style = paddingStyle(d);
         var columnsHtml = '';
@@ -113,15 +114,24 @@ const TemplateEngine = (() => {
             if (col && col.blocks && col.blocks.length > 0) {
                 innerContent = col.blocks.map(function(b) { return renderBlock(b); }).join('\n');
             }
-            columnsHtml += '<td valign="top" width="' + widthPct + '%" style="width:' + widthPct + '%;">' +
+
+            var tdStyle = 'width:' + widthPct + '%;vertical-align:top;';
+            if (i > 0) {
+                tdStyle += 'padding-left:' + gap + 'px;';
+            }
+
+            columnsHtml += '<td valign="top" width="' + widthPct + '%" style="' + tdStyle + '">' +
                 '<table border="0" cellpadding="0" cellspacing="0" width="100%">' +
                     innerContent +
                 '</table></td>';
         }
 
         return '<!--[if mso]>' +
-            '<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"><tr>' +
+            '<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="' + style + '"><tr>' +
+            columnsHtml +
+            '</tr></table>' +
             '<![endif]-->' +
+            '<!--[if !mso]><!-->' +
             '<table border="0" cellpadding="0" cellspacing="0" width="100%" style="' + style + '">' +
                 '<tr><td>' +
                     '<table border="0" cellpadding="0" cellspacing="0" width="100%">' +
@@ -129,9 +139,7 @@ const TemplateEngine = (() => {
                     '</table>' +
                 '</td></tr>' +
             '</table>' +
-            '<!--[if mso]>' +
-            '</tr></table>' +
-            '<![endif]-->';
+            '<!--<![endif]-->';
     }
 
     function renderBlock(block) {
@@ -241,18 +249,23 @@ const TemplateEngine = (() => {
             }
             case 'columns': {
                 var cols = d.columns || 2;
+                var gap = d.gap !== undefined ? d.gap : 12;
                 var colsHtml = '';
                 for (var i = 0; i < cols; i++) {
                     var child = d.children[i];
                     var inner = '';
+                    var colStyle = '';
+                    if (i > 0) {
+                        colStyle = ' style="margin-left:' + gap + 'px;"';
+                    }
                     if (child) {
                         inner = renderEditorBlock(child);
                     } else {
                         inner = '<p style="color:#9ca3af;text-align:center;">空栏</p>';
                     }
-                    colsHtml += '<div class="mj-column" data-col-index="' + i + '">' + inner + '</div>';
+                    colsHtml += '<div class="mj-column" data-col-index="' + i + '"' + colStyle + '>' + inner + '</div>';
                 }
-                return '<div class="mj-column-wrapper">' + colsHtml + '</div>';
+                return '<div class="mj-column-wrapper" style="gap:0;">' + colsHtml + '</div>';
             }
             default:
                 return '';

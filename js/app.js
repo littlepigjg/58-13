@@ -240,6 +240,7 @@ const App = (() => {
     function renderColumnsEditor(block) {
         var d = block.data;
         var cols = d.columns || 2;
+        var gap = d.gap !== undefined ? d.gap : 12;
         var state = LayoutManager.getState();
         var colsHtml = '';
 
@@ -249,6 +250,10 @@ const App = (() => {
 
             var isColSelected = state.selectedId && state.selectedColId === col.id;
             var colClass = 'mj-column' + (isColSelected ? ' column-selected' : '');
+            var colStyle = '';
+            if (i > 0) {
+                colStyle = ' style="margin-left:' + gap + 'px;"';
+            }
             var colContent = '';
 
             if (col.blocks && col.blocks.length > 0) {
@@ -262,7 +267,7 @@ const App = (() => {
                 colContent = '<div class="column-empty-hint"><p>👈 拖拽组件到这里</p></div>';
             }
 
-            colsHtml += '<div class="' + colClass + '" data-col-id="' + col.id + '" data-parent-block-id="' + block.id + '" data-col-index="' + i + '">' +
+            colsHtml += '<div class="' + colClass + '" data-col-id="' + col.id + '" data-parent-block-id="' + block.id + '" data-col-index="' + i + '"' + colStyle + '>' +
                 '<div class="column-header">第' + (i + 1) + '栏</div>' +
                 '<div class="column-content" data-col-id="' + col.id + '" data-parent-block-id="' + block.id + '">' +
                     colContent +
@@ -270,7 +275,7 @@ const App = (() => {
             '</div>';
         }
 
-        return '<div class="block-content"><div class="mj-column-wrapper">' + colsHtml + '</div></div>';
+        return '<div class="block-content"><div class="mj-column-wrapper" style="gap:0;">' + colsHtml + '</div></div>';
     }
 
     function renderChildBlockWrapper(block, index, parentBlockId, colId, isSelected) {
@@ -650,6 +655,14 @@ const App = (() => {
                     '<label for="' + inputId + '">' + field.label + '</label>' +
                     '<input type="' + field.type + '" id="' + inputId + '" data-field="' + field.key + '" value="' + (value !== undefined ? value : '') + '"' + step + '>' +
                 '</div>';
+            case 'range':
+                var min = field.min !== undefined ? ' min="' + field.min + '"' : '';
+                var max = field.max !== undefined ? ' max="' + field.max + '"' : '';
+                var step = field.step ? ' step="' + field.step + '"' : '';
+                return '<div class="form-group">' +
+                    '<label for="' + inputId + '">' + field.label + ' <span class="range-value" id="' + inputId + '-value">' + (value !== undefined ? value : 0) + '</span></label>' +
+                    '<input type="range" id="' + inputId + '" data-field="' + field.key + '" value="' + (value !== undefined ? value : 0) + '"' + min + max + step + '>' +
+                '</div>';
             case 'textarea':
                 return '<div class="form-group">' +
                     '<label for="' + inputId + '">' + field.label + '</label>' +
@@ -679,8 +692,15 @@ const App = (() => {
 
             input.addEventListener('input', function(e) {
                 var value = e.target.value;
-                if (input.type === 'number') {
+                if (input.type === 'number' || input.type === 'range') {
                     value = parseFloat(value) || 0;
+                }
+
+                if (input.type === 'range') {
+                    var valueEl = document.getElementById(input.id + '-value');
+                    if (valueEl) {
+                        valueEl.textContent = value;
+                    }
                 }
 
                 if (parentBlockId && colId) {
